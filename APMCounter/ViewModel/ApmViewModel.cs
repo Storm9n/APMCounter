@@ -32,7 +32,6 @@ namespace APMCounter.ViewModel
         }
 
 
-        // INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyname = null)
@@ -40,7 +39,6 @@ namespace APMCounter.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
-        // IObserver
         public virtual void Subscribe(IObservable<Action> provider)
         {
             if (provider != null)
@@ -50,12 +48,11 @@ namespace APMCounter.ViewModel
         public void OnNext(Action value)
         {
             Apm = bucket.CalculateApm();
-            Console.WriteLine(Apm);
         }
 
         public void OnError(Exception error)
         {
-            Console.WriteLine(error.ToString());
+            return;
         }
 
         public void OnCompleted()

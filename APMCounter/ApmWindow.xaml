@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:viewmodel="clr-namespace:APMCounter.ViewModel"
         mc:Ignorable="d" WindowStyle="None"
-        Title="MainWindow" Height="40" Width="80">
+        Title="MainWindow" Height="40" Width="60">
     <Window.DataContext >
         <viewmodel:ApmViewModel/>
     </Window.DataContext>
