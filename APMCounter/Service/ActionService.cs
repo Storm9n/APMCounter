@@ -73,15 +73,16 @@ namespace APMCounter.Service
 
         const int WM_LBUTTONDOWN = 0x201; // Left mouse button down
         const int WM_RBUTTONDOWN = 0x204; // Right mouse button down
+        const int WM_MBUTTONDOWN = 0x207; // Middle mouse button down
+        const int WM_45BUTTONDOWN = 0x020B; // 4 5 mouse button down
 
 
         private IntPtr HookCallbackMouse(int nCode, IntPtr wParam, IntPtr lParam)
         {  
-            if (nCode >= 0 && (wParam == (IntPtr)WM_LBUTTONDOWN || wParam == (IntPtr)WM_RBUTTONDOWN))
+            if (nCode >= 0 
+                && (wParam == (IntPtr)WM_LBUTTONDOWN || wParam == (IntPtr)WM_RBUTTONDOWN) || wParam == (IntPtr)WM_MBUTTONDOWN || wParam == (IntPtr)WM_45BUTTONDOWN)
             {
-                // Extract mouse hook data
                 MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
-                // TODO make useful action object from mouse information
                 DateTimeOffset unixTimestamp = DateTimeOffset.UtcNow;
                 if (wParam == (IntPtr)WM_LBUTTONDOWN)
                 {
@@ -93,7 +94,16 @@ namespace APMCounter.Service
                     Model.Action action = new Model.Action(-2, "RBUTTONDOWN", unixTimestamp);
                     _actionBucket.Insert(action);
                 }
-                // Print mouse click details
+                if (wParam == (IntPtr)WM_MBUTTONDOWN)
+                {
+                    Model.Action action = new Model.Action(-3, "MBUTTONDOWN", unixTimestamp);
+                    _actionBucket.Insert(action);
+                }
+                if (wParam == (IntPtr)WM_45BUTTONDOWN)
+                {
+                    Model.Action action = new Model.Action(-4, "45BUTTONDOWN", unixTimestamp);
+                    _actionBucket.Insert(action);
+                }
             }
 
             // Call the next hook in the chain
