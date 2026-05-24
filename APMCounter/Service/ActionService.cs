@@ -63,10 +63,7 @@ namespace APMCounter.Service
         {
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
-                int vkCode = Marshal.ReadInt32(lParam);
-                DateTimeOffset unixTimestamp = DateTimeOffset.UtcNow;
-                Model.Action action = new Model.Action(vkCode, ((Keys)vkCode).ToString(), unixTimestamp);
-                _actionBucket.Insert(action);
+                _actionBucket.Increase();
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
@@ -86,23 +83,19 @@ namespace APMCounter.Service
                 DateTimeOffset unixTimestamp = DateTimeOffset.UtcNow;
                 if (wParam == (IntPtr)WM_LBUTTONDOWN)
                 {
-                    Model.Action action = new Model.Action(-1, "LBUTTONDOWN", unixTimestamp);
-                    _actionBucket.Insert(action);
+                    _actionBucket.Increase();
                 }
                 if (wParam == (IntPtr)WM_RBUTTONDOWN)
                 {
-                    Model.Action action = new Model.Action(-2, "RBUTTONDOWN", unixTimestamp);
-                    _actionBucket.Insert(action);
+                    _actionBucket.Increase();
                 }
                 if (wParam == (IntPtr)WM_MBUTTONDOWN)
                 {
-                    Model.Action action = new Model.Action(-3, "MBUTTONDOWN", unixTimestamp);
-                    _actionBucket.Insert(action);
+                    _actionBucket.Increase();
                 }
                 if (wParam == (IntPtr)WM_45BUTTONDOWN)
                 {
-                    Model.Action action = new Model.Action(-4, "45BUTTONDOWN", unixTimestamp);
-                    _actionBucket.Insert(action);
+                    _actionBucket.Increase();
                 }
             }
 

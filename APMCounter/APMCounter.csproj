@@ -95,7 +95,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Action.cs" />
     <Compile Include="Model\ActionBucket.cs" />
     <Compile Include="Service\ActionService.cs" />
     <Compile Include="Helper\Consts.cs" />

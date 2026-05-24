@@ -6,10 +6,10 @@ using System.Threading;
 
 namespace APMCounter.Model
 {
-    internal class ActionBucket: IObservable<Action>
+    internal class ActionBucket: IObservable<int>
     {
-        private readonly List<IObserver<Action>> _observers;
-        private readonly List<Action>[] apmBucket;
+        private readonly List<IObserver<int>> _observers;
+        private readonly int[] apmBucket;
         private readonly Timer timer;
         private int _bucketIndex;
         // Private static instance of the class
@@ -18,12 +18,8 @@ namespace APMCounter.Model
 
         private ActionBucket()
         {
-            _observers = new List<IObserver<Action>>();
-            apmBucket = new List<Action>[Consts.SECONDSFORAPM];
-            foreach (int i in Enumerable.Range(0, Consts.SECONDSFORAPM)) 
-            { 
-                apmBucket[i] = new List<Action>(); 
-            }
+            _observers = new List<IObserver<int>>();
+            apmBucket = new int[Consts.SECONDSFORAPM];
             DateTimeOffset now = DateTimeOffset.Now;
             int millisecondsOffSecond = (int)Math.Round((now.AddSeconds(1) - now).TotalMilliseconds);
             timer = new Timer(SetBucketIndex, null, millisecondsOffSecond, 1000);
@@ -31,41 +27,41 @@ namespace APMCounter.Model
 
         public static ActionBucket Instance => instance.Value;
 
-        public void Insert(Action action)
+        public void Increase()
         {
-            apmBucket[_bucketIndex].Add(action);
-            NotifyObservers(action);
+            apmBucket[_bucketIndex] += 1;
+            NotifyObservers(apmBucket[_bucketIndex]);
         }
 
-        public void Remove(Action action)
+        public void Decrease()
         {
-            apmBucket[_bucketIndex].Remove(action);
-            NotifyObservers(action);
+            apmBucket[_bucketIndex] -= 1;
+            NotifyObservers(apmBucket[_bucketIndex]);
         }
 
-        public void RemoveAtSecond()
+        public void RemoveAtSecond(int second)
         {
-            apmBucket[_bucketIndex].Clear();
-            NotifyObservers(null);
+            apmBucket[second % Consts.SECONDSFORAPM] = 0;
+            NotifyObservers(0);
         }
 
-        public List<Action> RetrieveAtSecond(int second)
+        public int RetrieveAtSecond(int second)
         {
             return apmBucket[second % Consts.SECONDSFORAPM];
         }
 
         public int CalculateApm()
         {
-            return apmBucket.Aggregate(0, (result, actionList) => result + actionList.Count);
+            return apmBucket.Aggregate(0, (result, apmAtSecond) => result + apmAtSecond);
         }
 
         private void SetBucketIndex(object state)
         {
             _bucketIndex = DateTimeOffset.Now.Second % Consts.SECONDSFORAPM;
-            RemoveAtSecond();
+            RemoveAtSecond(_bucketIndex);
         }
 
-        public IDisposable Subscribe(IObserver<Action> observer)
+        public IDisposable Subscribe(IObserver<int> observer)
         {
             if (!_observers.Contains(observer))
                _observers.Add(observer);
@@ -74,10 +70,10 @@ namespace APMCounter.Model
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<Action>> _observers;
-            private IObserver<Action> _observer;
+            private List<IObserver<int>> _observers;
+            private IObserver<int> _observer;
 
-            public Unsubscriber(List<IObserver<Action>> observers, IObserver<Action> observer)
+            public Unsubscriber(List<IObserver<int>> observers, IObserver<int> observer)
             {
                 _observers = observers;
                 _observer = observer;
@@ -90,7 +86,7 @@ namespace APMCounter.Model
             }
         }
 
-        public void NotifyObservers(Action action)
+        public void NotifyObservers(int action)
         {
             foreach (var observer in _observers)
             {

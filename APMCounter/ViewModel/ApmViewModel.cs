@@ -1,11 +1,10 @@
 ﻿using APMCounter.Model;
 using System;
 using System.ComponentModel;
-using Action = APMCounter.Model.Action;
 
 namespace APMCounter.ViewModel
 {
-    internal class ApmViewModel: INotifyPropertyChanged, IObserver<Action>
+    internal class ApmViewModel: INotifyPropertyChanged, IObserver<int>
     {
         public ActionBucket bucket;
         private int apm;
@@ -39,13 +38,13 @@ namespace APMCounter.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
-        public virtual void Subscribe(IObservable<Action> provider)
+        public virtual void Subscribe(IObservable<int> provider)
         {
             if (provider != null)
                 unsubscriber = provider.Subscribe(this);
         }
 
-        public void OnNext(Action value)
+        public void OnNext(int value)
         {
             Apm = bucket.CalculateApm();
         }
